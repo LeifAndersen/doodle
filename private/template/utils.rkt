@@ -1,6 +1,7 @@
 #lang racket
 
 (provide (all-defined-out))
+(require scribble/core)
 
 (define (exact . items)
   (make-element (make-style "identity" '(exact-chars))

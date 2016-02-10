@@ -16,25 +16,26 @@
 
 (define-runtime-path base-project-path "./private/template")
 (define input-file (make-parameter "paper.scrbl"))
-(define style-file (make-parameter "textstyle.tex"))
+(define style-file (make-parameter "texstyle.tex"))
 (define new-project (make-parameter #f))
 
-(define args
-  (command-line
-   #:program (short-program+command-name)
-   #:once-any
-   [("-s" "--style") s
-    "Set the style file"
-    (style-file s)]
-   [("-n" "--new") name
-    "Create a new project"
-    (new-project name)]
-   #:args ([input-file "paper.scrbl"])
-   input-file))
+(module+ main
+  (define args
+    (command-line
+     #:program (short-program+command-name)
+     #:once-any
+     [("-s" "--style") s
+      "Set the style file"
+      (style-file s)]
+     [("-n" "--new") name
+      "Create a new project"
+      (new-project name)]
+     #:args ([input-file "paper.scrbl"])
+     input-file))
 
-(input-file args)
+  (input-file args)
 
-(cond [(new-project)
-       (copy-directory/files base-project-path (new-project))]
-      [else
-       (scribble->tex (input-file) (style-file))])
+  (cond [(new-project)
+         (copy-directory/files base-project-path (new-project))]
+        [else
+         (scribble->tex (input-file) (style-file))]))
