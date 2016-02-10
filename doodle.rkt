@@ -1,35 +1,40 @@
 #lang racket/base
 
-(module+ test
-  (require rackunit))
+(require racket/cmdline
+         scribble/render
+         scribble/pdf-render
+         raco/command-name
+         racket/runtime-path
+         racket/file)
 
-;; Notice
-;; To install (from within the package directory):
-;;   $ raco pkg install
-;; To install (once uploaded to pkgs.racket-lang.org):
-;;   $ raco pkg install <<name>>
-;; To uninstall:
-;;   $ raco pkg remove <<name>>
-;; To view documentation:
-;;   $ raco doc <<name>>
-;;
-;; For your convenience, we have included a LICENSE.txt file, which links to
-;; the GNU Lesser General Public License.
-;; If you would prefer to use a different license, replace LICENSE.txt with the
-;; desired license.
-;;
-;; Some users like to add a `private/` directory, place auxiliary files there,
-;; and require them in `main.rkt`.
-;;
-;; See the current version of the racket style guide here:
-;; http://docs.racket-lang.org/style/index.html
+(define (scribble->tex input-file style-file)
+  (define doc (dynamic-require input-file 'doc))
+  (render (list doc)
+          (list input-file)
+          #:render-mixin render-mixin
+          #:style-extra-files (list style-file)))
 
-;; Code here
+(define-runtime-path base-project-path "./private/template")
+(define input-file (make-parameter "paper.scrbl"))
+(define style-file (make-parameter "textstyle.tex"))
+(define new-project (make-parameter #f))
 
-(module+ test
-  ;; Tests to be run with raco test
-  )
+(define args
+  (command-line
+   #:program (short-program+command-name)
+   #:once-any
+   [("-s" "--style") s
+    "Set the style file"
+    (style-file s)]
+   [("-n" "--new") name
+    "Create a new project"
+    (new-project name)]
+   #:args ([input-file "paper.scrbl"])
+   input-file))
 
-(module+ main
-  ;; Main entry point, executed when run with the `racket` executable or DrRacket.
-  )
+(input-file args)
+
+(cond [(new-project)
+       (copy-directory/files base-project-path (new-project))]
+      [else
+       (scribble->tex (input-file) (style-file))])
