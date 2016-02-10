@@ -36,6 +36,10 @@
   (input-file args)
 
   (cond [(new-project)
-         (copy-directory/files base-project-path (new-project))]
+         (unless (directory-exists? (new-project))
+           (make-directory (new-project)))
+         (copy-file (build-path base-project-path "paper.scrbl") (build-path (new-project) "paper.scrbl"))
+         (copy-file (build-path base-project-path "texstyle.tex") (build-path (new-project) "texstyle.tex"))
+         (copy-file (build-path base-project-path "utils.rkt") (build-path (new-project) "utils.rkt"))]
         [else
          (scribble->tex (input-file) (style-file))]))
