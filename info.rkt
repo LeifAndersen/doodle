@@ -1,7 +1,10 @@
 #lang info
 (define collection "doodle")
 (define deps '("base"
-               "rackunit-lib"))
+               "rackunit-lib"
+               "scribble-lib"
+               "pict-lib"
+               "draw-lib"))
 (define build-deps '("scribble-lib" "racket-doc"))
 (define scribblings '(("scribblings/doodle.scrbl" ())))
 (define pkg-desc "Description Here")
