@@ -7,17 +7,19 @@
          racket/runtime-path
          racket/file)
 
-(define (scribble->tex input-file style-file)
+(define (scribble->tex input-file style-file extra-files)
   (define doc (dynamic-require input-file 'doc))
   (render (list doc)
           (list input-file)
           #:render-mixin render-mixin
-          #:style-extra-files (list style-file)))
+          #:style-extra-files (list style-file)
+          #:extra-files extra-files))
 
 (define-runtime-path base-project-path "./private/template")
 (define input-file (make-parameter "paper.scrbl"))
 (define style-file (make-parameter "texstyle.tex"))
 (define new-project (make-parameter #f))
+(define extra-files (make-parameter '()))
 
 (module+ main
   (define args
@@ -30,6 +32,10 @@
      [("-n" "--new") name
       "Create a new project"
       (new-project name)]
+     #:multi
+     ["--extra" x 
+      "Add the given file as an extra file"
+      (extra-files (cons x (extra-files)))]
      #:args ([input-file "paper.scrbl"])
      input-file))
 
@@ -42,4 +48,4 @@
          (copy-file (build-path base-project-path "texstyle.tex") (build-path (new-project) "texstyle.tex"))
          (copy-file (build-path base-project-path "utils.rkt") (build-path (new-project) "utils.rkt"))]
         [else
-         (scribble->tex (input-file) (style-file))]))
+         (scribble->tex (input-file) (style-file) (extra-files))]))
